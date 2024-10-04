@@ -1,8 +1,5 @@
 #!/bin/bash
 
-users_list=()
-
-
 print_peers() {
     echo "Список пользователей:"
     for i in "${!users_list[@]}"; do
@@ -54,6 +51,8 @@ get_download_link() {
 }
 
 rootVPN="/etc/wireguard"
+
+users_list=()
 
 list_peers
 get_download_link
