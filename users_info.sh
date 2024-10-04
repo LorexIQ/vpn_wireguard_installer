@@ -21,7 +21,7 @@ list_peers() {
 
             users_list+=("$username")
         fi
-    done < /etc/wireguard/wg0.conf
+    done < "$rootVPN/wg0.conf"
 
     if [ ${#users_list[@]} -eq 0 ]; then
         echo "Нет зарегистрированных пользователей."
