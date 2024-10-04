@@ -31,7 +31,29 @@ list_peers() {
         exit 1
     fi
 
-    print_peers
+    while true; do
+        print_peers
+        read -p "Выберите номер пользователя для получения конфигурации: " user_choice
+
+        if [ "$user_choice" -ge 1 ] && [ "$user_choice" -le "${#users_list[@]}" ]; then
+            username="${users_list[$((user_choice - 1))]}"
+            break
+        else
+            echo "Ошибка: такого пользователя нет."
+        fi
+    done
 }
 
+get_download_link() {
+    interface_address=$(awk -F'/' '{print $1}' "$rootVPN/interface")
+    directory="$rootVPN/users"
+
+    echo "Ссылка для скачивания конфигурации:"
+    echo "- Windown: scp root@$interface_address:$directory/$username.conf C:\\$username.conf"
+    echo "- Linux: scp root@$interface_address:$directory/$username.conf /root/$username.conf"
+}
+
+rootVPN="/etc/wireguard"
+
 list_peers
+get_download_link

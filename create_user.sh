@@ -5,15 +5,15 @@ is_valid_username() {
 }
 
 create_users_folder() {
-    users_directory="/etc/wireguard/users"
+    users_directory="$rootVPN/users"
     if [ ! -d "$users_directory" ]; then
         mkdir "$users_directory"
     fi
 }
 
 get_ips() {
-    interfaceAddress=$(awk -F'/' '{print $1}' /etc/wireguard/interface)
-    last_allowed_ip=$(grep -A 1 "[Peer]" /etc/wireguard/wg0.conf | tail -n 2 | grep "AllowedIPs" | tail -n 1 | awk -F'.' '{print $NF}' | awk '{print $1}' | cut -d'/' -f1)
+    interface_address=$(awk -F'/' '{print $1}' "$rootVPN/interface")
+    last_allowed_ip=$(grep -A 1 "[Peer]" "$rootVPN/wg0.conf" | tail -n 2 | grep "AllowedIPs" | tail -n 1 | awk -F'.' '{print $NF}' | awk '{print $1}' | cut -d'/' -f1)
     last_octet=2
 
     if [ -n "$last_allowed_ip" ]; then
@@ -26,7 +26,7 @@ get_ips() {
 add_peer() {
     client_public_key=$(cat "$directory/publickey")
 
-    cat << EOF >> /etc/wireguard/wg0.conf
+    cat << EOF >> "$rootVPN/wg0.conf"
 
 [Peer]
 # UserName = $username
@@ -51,7 +51,7 @@ restart_server() {
 
 create_client_config() {
     local client_private_key=$(cat "$directory/privatekey")
-    local server_public_key=$(cat "/etc/wireguard/server_publickey")
+    local server_public_key=$(cat "$rootVPN/server_publickey")
 
     cat << EOF > "$directory/$username.conf"
 [Interface]
@@ -61,7 +61,7 @@ DNS = 8.8.8.8
 
 [Peer]
 PublicKey = $server_public_key
-Endpoint = $interfaceAddress:51820
+Endpoint = $interface_address:51820
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 20
 EOF
@@ -69,8 +69,8 @@ EOF
 
 get_download_link() {
     echo "Ссылка для скачивания конфигурации:"
-    echo "- Windown: scp root@$interfaceAddress:$directory/$username.conf C:\\$username.conf"
-    echo "- Linux: scp root@$interfaceAddress:$directory/$username.conf /root/$username.conf"
+    echo "- Windows: scp root@$interface_address:$directory/$username.conf C:\\$username.conf"
+    echo "- Linux: scp root@$interface_address:$directory/$username.conf /root/$username.conf"
 }
 
 name_input() {
@@ -98,6 +98,8 @@ name_input() {
         fi
     done
 }
+
+rootVPN="/etc/wireguard"
 
 create_users_folder
 name_input

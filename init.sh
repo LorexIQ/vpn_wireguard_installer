@@ -26,19 +26,19 @@ wireguard_install() {
 
 wireguard_genkey() {
     echo "Генерация пары ключей..."
-    cd /etc/wireguard/
-    wg genkey | tee /etc/wireguard/server_privatekey | wg pubkey | tee /etc/wireguard/server_publickey > /dev/null 2>&1
+    cd "$rootVPN"
+    wg genkey | tee "$rootVPN/server_privatekey" | wg pubkey | tee "$rootVPN/server_publickey" > /dev/null 2>&1
     echo "Пара ключей успешно сгенерирована."
 }
 
 wireguard_create_config() {
-    local private_key=$(cat "/etc/wireguard/server_privatekey")
+    local private_key=$(cat "$rootVPN/server_privatekey")
     local address="10.0.0.1/24"
     local listen_port=51820
     local interface="${interfacesNames[interfaceIndex]}"
 
     echo "Создание файла конфигурации сервера..."
-    cat << EOF > "/etc/wireguard/wg0.conf"
+    cat << EOF > "$rootVPN/wg0.conf"
 [Interface]
 PrivateKey = $private_key
 Address = $address
@@ -83,7 +83,7 @@ choose_interface() {
 
         if [[ $choice =~ ^[0-9]+$ ]] && (( choice > 0 && choice <= ${#interfacesNames[@]} )); then
             interfaceIndex=$((choice-1))
-            cat << EOF > "/etc/wireguard/interface"
+            cat << EOF > "$rootVPN/interface"
 ${interfacesIps[interfaceIndex]}
 EOF
             echo "Выбран интерфейс: ${interfacesNames[interfaceIndex]}"
@@ -109,6 +109,8 @@ run_server() {
         exit 1
     fi
 }
+
+rootVPN="/etc/wireguard"
 
 interfacesNames=()
 interfacesIps=()

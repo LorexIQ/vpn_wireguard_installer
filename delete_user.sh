@@ -1,8 +1,5 @@
 #!/bin/bash
 
-users_list=()
-
-
 print_peers() {
     echo "Выберите пользователя для удаления:"
     for i in "${!users_list[@]}"; do
@@ -24,7 +21,7 @@ list_peers() {
 
             users_list+=("$username")
         fi
-    done < /etc/wireguard/wg0.conf
+    done < "$rootVPN/wg0.conf"
 
     if [ ${#users_list[@]} -eq 0 ]; then
         echo "Нет доступных для удаления пользователей."
@@ -60,7 +57,7 @@ restart_server() {
 
 remove_peer() {
     awk -v username="$username" '
-        /^\[Peer\]$/ { 
+        /^\[Peer\]$/ {
             if (inBlock && !skip) {
                 if (block !~ /^\n*$/) print block;
             }
@@ -85,9 +82,9 @@ remove_peer() {
                 system("truncate -s -1 temp");
             }
         }
-    ' /etc/wireguard/wg0.conf > temp && mv temp /etc/wireguard/wg0.conf
+    ' "$rootVPN/wg0.conf" > temp && mv temp "$rootVPN/wg0.conf"
 
-    user_directory="/etc/wireguard/users/$username"
+    user_directory="$rootVPN/users/$username"
     if [ -d "$user_directory" ]; then
         rm -rf "$user_directory"
         echo "Пользователь $username успешно удалён."
@@ -95,6 +92,10 @@ remove_peer() {
         echo "Ключи пользователя $username не найдены."
     fi
 }
+
+rootVPN="/etc/wireguard"
+
+users_list=()
 
 list_peers
 remove_peer
