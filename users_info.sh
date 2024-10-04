@@ -46,7 +46,7 @@ list_peers() {
 
 get_download_link() {
     interface_address=$(awk -F'/' '{print $1}' "$rootVPN/interface")
-    directory="$rootVPN/users"
+    directory="$rootVPN/users/$username"
 
     echo "Ссылка для скачивания конфигурации:"
     echo "- Windown: scp root@$interface_address:$directory/$username.conf C:\\$username.conf"
